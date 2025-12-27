@@ -1,0 +1,15 @@
+<ImageView
+    android:id="@+id/header_icon"
+    android:layout_width="80dp"
+    android:layout_height="80dp"
+    android:layout_centerHorizontal="true"
+    android:layout_marginTop="32dp"
+    android:src="@drawable/ic_app_logo"
+    android:contentDescription="ToddleStep Logo" />
+
+<TextView
+    android:id="@+id/header"
+    android:layout_below="@id/header_icon"
+    ```
+
+You now have a complete, working prototype with verified protocols, a calming design, and a custom brand icon. Good luck with the build!

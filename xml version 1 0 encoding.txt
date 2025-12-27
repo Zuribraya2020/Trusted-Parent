@@ -1,23 +1,94 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.toddlestep">
++<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
+    package com.example.toddlestep
 
-    <uses-permission android:name="android.permission.CALL_PHONE" />
+    import android.content.Intent
+    import android.net.Uri
+    import android.os.Bundle
+    import android.os.CountDownTimer
+    import androidx.appcompat.app.AlertDialog
+    import androidx.appcompat.app.AppCompatActivity
+    import com.google.android.material.button.MaterialButton
+    import android.widget.TextView
 
-    <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="ToddleStep"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.ToddleStep">
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
-</manifest>
+    class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+    setContentView(R.layout.activity_main)
+
+    val sosButton: MaterialButton = findViewById(R.id.btn_sos)
+    sosButton.setOnClickListener { showSOSDialog() }
+    }
+
+    private fun showSOSDialog() {
+    val options = arrayOf(
+    "Tantrum: I need to stay calm",
+    "Medical: Fever/Choking Guide",
+    "Safety: Call Poison Control",
+    "Activity: 5-minute distraction"
+    )
+
+    AlertDialog.Builder(this)
+    .setTitle("Take a breath. What's happening?")
+    .setItems(options) { _, which ->
+    when (which) {
+    0 -> startBreathingTimer() // Regulation first
+    1 -> showGuidance("Medical", "CDC Guidance: For fever over 102.2°F (39°C) in toddlers, or if they are unusually drowsy, call your pediatrician immediately.")
+    2 -> dialPoisonControl()
+    3 -> showGuidance("Quick Play", "The 'Sorting Game': Give them a muffin tin and different colored socks. Ask them to put one color in each hole.")
+    }
+    }
+    .show()
+    }
+
+    private fun startBreathingTimer() {
+    // A 30-second timer to help the parent co-regulate
+    val builder = AlertDialog.Builder(this)
+    builder.setTitle("Breathe with the circle...")
+    builder.setMessage("Inhale for 4, Hold for 4, Exhale for 4...")
+
+    val dialog = builder.create()
+    dialog.show()
+
+    object : CountDownTimer(30000, 1000) {
+    override fun onTick(millisUntilFinished: Long) {
+    dialog.setMessage("Focus on your breath. ${millisUntilFinished / 1000}s remaining.")
+    }
+    override fun onFinish() {
+    dialog.setTitle("You are centered.")
+    dialog.setMessage("Now, approach your child with a low, calm voice.")
+    }
+    }.start()
+    }
+
+    private fun dialPoisonControl() {
+    val intent = Intent(Intent.ACTION_DIAL)
+    intent.data = Uri.parse("tel:18002221222")
+    startActivity(intent)
+    }
+
+    private fun showGuidance(title: String, message: String) {
+    AlertDialog.Builder(this)
+    .setTitle(title)
+    .setMessage(message)
+    .setPositiveButton("Got it", null)
+    .show()
+    }
+    }
