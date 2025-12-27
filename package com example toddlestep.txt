@@ -1,0 +1,103 @@
+package com.example.toddlestep
+
+import android.content.Intent
+import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
+import android.net.Uri
+import android.os.Bundle
+import android.os.CountDownTimer
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // --- 🎨 PROGRAMMATIC UI (No XML Needed) ---
+        val rootLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setBackgroundColor(Color.parseColor("#FFF9F1")) // Warm Cream
+            setPadding(50, 50, 50, 50)
+        }
+
+        val title = TextView(this).apply {
+            text = "ToddleStep"
+            textSize = 32f
+            setTextColor(Color.parseColor("#5D4037")) // Cocoa
+            typeface = Typeface.DEFAULT_BOLD
+            gravity = Gravity.CENTER
+        }
+
+        val subtitle = TextView(this).apply {
+            text = "You are a calm, capable parent."
+            textSize = 16f
+            setTextColor(Color.parseColor("#5D4037"))
+            alpha = 0.7f
+            gravity = Gravity.CENTER
+            setPadding(0, 10, 0, 100)
+        }
+
+        // --- 🆘 THE SOS BUTTON ---
+        val sosButton = Button(this).apply {
+            text = "SOS"
+            textSize = 36f
+            setTextColor(Color.WHITE)
+            
+            // Circular Shape & Apricot Color
+            val shape = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(Color.parseColor("#F4A460")) // Warm Apricot
+            }
+            background = shape
+            
+            layoutParams = LinearLayout.LayoutParams(600, 600) // Large & Prominent
+            setOnClickListener { showSOSMenu() }
+        }
+
+        // Assembly
+        rootLayout.addView(title)
+        rootLayout.addView(subtitle)
+        rootLayout.addView(sosButton)
+        setContentView(rootLayout)
+    }
+
+    private fun showSOSMenu() {
+        val options = arrayOf(
+            "Calm Down Timer (30s)",
+            "Choking Emergency (AAP Verified)",
+            "Call Poison Control",
+            "Fever Guidelines (CDC)"
+        )
+
+        AlertDialog.Builder(this)
+            .setTitle("Deep Breath. What's happening?")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> startTimer()
+                    1 -> showDialog("Choking", "AAP: If no sound/cough, 5 back blows & 5 thrusts. Call 911.")
+                    2 -> startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:18002221222")))
+                    3 -> showDialog("Fever", "CDC: Seek help if fever >104°F or child is unresponsive.")
+                }
+            }
+            .show()
+    }
+
+    private fun startTimer() {
+        val d = AlertDialog.Builder(this).setTitle("Breathe").setMessage("Inhale...").show()
+        object : CountDownTimer(30000, 1000) {
+            override fun onTick(ms: Long) { d.setMessage("Focus on your breath: ${ms/1000}s") }
+            override fun onFinish() { d.setTitle("Centered."); d.setMessage("You're ready.") }
+        }.start()
+    }
+
+    private fun showDialog(t: String, m: String) {
+        AlertDialog.Builder(this).setTitle(t).setMessage(m).setPositiveButton("OK", null).show()
+    }
+}
