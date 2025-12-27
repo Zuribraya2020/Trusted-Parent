@@ -1,0 +1,568 @@
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Phone, BookOpen, X, Wind, Music, MessageCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+const breathingSteps = [
+  { instruction: "Breathe in slowly...", duration: 4 },
+  { instruction: "Hold gently...", duration: 4 },
+  { instruction: "Breathe out slowly...", duration: 6 },
+];
+
+const quickTips = [
+  "It's okay to put your child in a safe place and step away for a moment.",
+  "You're doing better than you think. This moment will pass.",
+  "Your child's behavior is not a reflection of your worth as a parent.",
+  "It's okay to feel overwhelmed. All parents do sometimes.",
+  "Take one breath. Then another. You've got this.",
+];
+
+const emergencyResources = [
+  { name: "National Parent Helpline", phone: "1-855-427-2736", description: "Emotional support for parents" },
+  { name: "Crisis Text Line", phone: "Text HOME to 741741", description: "24/7 crisis support" },
+  { name: "Childhelp National Hotline", phone: "1-800-422-4453", description: "24/7 child abuse prevention" },
+];
+
+export default function SOSButton() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('breathe');
+  const [breathingPhase, setBreathingPhase] = useState(0);
+  const [isBreathing, setIsBreathing] = useState(false);
+  const [currentTip] = useState(() => quickTips[Math.floor(Math.random() * quickTips.length)]);
+
+  const startBreathing = () => {
+    setIsBreathing(true);
+    setBreathingPhase(0);
+    let phase = 0;
+    
+    const cycle = () => {
+      setBreathingPhase(phase % 3);
+      const duration = breathingSteps[phase % 3].duration * 1000;
+      phase++;
+      if (phase < 9) { // 3 full cycles
+        setTimeout(cycle, duration);
+      } else {
+        setIsBreathing(false);
+      }
+    };
+    cycle();
+  };
+
+  return (
+    <>
+      <motion.button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 z-50 w-20 h-20 rounded-full bg-gradient-to-br from-[#E8B4A0] to-[#D4A088] shadow-lg flex items-center justify-center text-white"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      >
+        <div className="text-center">
+          <Heart className="w-8 h-8 mx-auto mb-0.5" />
+          <span className="text-xs font-medium">SOS</span>
+        </div>
+      </motion.button>
+
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent className="sm:max-w-md bg-[#FDFBF7] border-none">
+          <DialogHeader>
+            <DialogTitle className="text-center text-[#5B6E5D] text-xl font-light">
+              Take a moment. You're not alone.
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex gap-2 mb-4">
+            {[
+              { id: 'breathe', icon: Wind, label: 'Breathe' },
+              { id: 'tips', icon: MessageCircle, label: 'Tips' },
+              { id: 'help', icon: Phone, label: 'Help' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-1 py-3 px-2 rounded-xl transition-all flex flex-col items-center gap-1 ${
+                  activeTab === tab.id
+                    ? 'bg-[#A8C5A8] text-white'
+                    : 'bg-white text-[#5B6E5D] hover:bg-[#E8E4DC]'
+                }`}
+              >
+                <tab.icon className="w-5 h-5" />
+                <span className="text-xs font-medium">{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <AnimatePresence mode="wait">
+            {activeTab === 'breathe' && (
+              <motion.div
+                key="breathe"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-center py-6"
+              >
+                {isBreathing ? (
+                  <div className="space-y-6">
+                    <motion.div
+                      className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-[#A8C5A8] to-[#8FB38F] flex items-center justify-center"
+                      animate={{
+                        scale: breathingPhase === 0 ? [1, 1.3] : breathingPhase === 1 ? 1.3 : [1.3, 1],
+                      }}
+                      transition={{ duration: breathingSteps[breathingPhase].duration }}
+                    >
+                      <Wind className="w-12 h-12 text-white" />
+                    </motion.div>
+                    <p className="text-lg text-[#5B6E5D] font-light">
+                      {breathingSteps[breathingPhase].instruction}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-[#6B7B6B]">
+                      A simple breathing exercise to help you reset.
+                    </p>
+                    <Button
+                      onClick={startBreathing}
+                      className="bg-[#A8C5A8] hover:bg-[#8FB38F] text-white rounded-full px-8 py-6"
+                    >
+                      Start Breathing Exercise
+                    </Button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {activeTab === 'tips' && (
+              <motion.div
+                key="tips"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="py-6"
+              >
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#E8E4DC]">
+                  <MessageCircle className="w-8 h-8 text-[#D4A088] mb-4" />
+                  <p className="text-[#5B6E5D] text-lg font-light leading-relaxed">
+                    "{currentTip}"
+                  </p>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'help' && (
+              <motion.div
+                key="help"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="space-y-3"
+              >
+                {emergencyResources.map((resource, idx) => (
+                  <a
+                    key={idx}
+                    href__={resource.phone.startsWith('1-') ? `tel:${resource.phone}` : '#'}
+                    className="block bg-white rounded-xl p-4 shadow-sm border border-[#E8E4DC] hover:border-[#A8C5A8] transition-colors"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-[#E8E4DC] flex items-center justify-center flex-shrink-0">
+                        <Phone className="w-5 h-5 text-[#5B6E5D]" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-[#5B6E5D]">{resource.name}</h4>
+                        <p className="text-[#D4A088] font-medium">{resource.phone}</p>
+                        <p className="text-sm text-[#8B9B8B]">{resource.description}</p>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+Timer.jsx - Timer with presets
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Play, Pause, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+
+const presets = [
+  { label: '10 min', minutes: 10 },
+  { label: '15 min', minutes: 15 },
+  { label: '20 min', minutes: 20 },
+  { label: '30 min', minutes: 30 },
+];
+
+export default function Timer() {
+  const [selectedPreset, setSelectedPreset] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (isRunning && timeLeft > 0) {
+      intervalRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalRef.current);
+            setIsRunning(false);
+            if (soundEnabled) {
+              const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Onp+dm4h3aGRweISLjIqHgXl0cnJ1eH19fXx7enl4d3Z1dHNycXBvbm1sa2ppaGdmZWRjYmFgX15dXFtaWVhXVlVUU1JRUE9OTUxLSklIR0ZFRENCQUA/Pj08Ozo5ODc2NTQzMjEwLy4tLCsqKSgnJiUkIyIhIB8eHRwbGhkYFxYVFBMSERAPDg0MCwoJCAcGBQQDAgEAAQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/');
+              audio.play().catch(() => {});
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => clearInterval(intervalRef.current);
+  }, [isRunning, soundEnabled]);
+
+  const selectPreset = (minutes) => {
+    setSelectedPreset(minutes);
+    setTimeLeft(minutes * 60);
+    setIsRunning(false);
+  };
+
+  const toggleTimer = () => {
+    if (timeLeft > 0) {
+      setIsRunning(!isRunning);
+    }
+  };
+
+  const resetTimer = () => {
+    setIsRunning(false);
+    if (selectedPreset) {
+      setTimeLeft(selectedPreset * 60);
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const progress = selectedPreset ? (timeLeft / (selectedPreset * 60)) * 100 : 0;
+
+  return (
+    <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#E8E4DC]">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-medium text-[#5B6E5D]">Quick Timer</h3>
+        <button
+          onClick={() => setSoundEnabled(!soundEnabled)}
+          className="p-2 rounded-full hover:bg-[#F5F3EE] transition-colors"
+        >
+          {soundEnabled ? (
+            <Volume2 className="w-5 h-5 text-[#8B9B8B]" />
+          ) : (
+            <VolumeX className="w-5 h-5 text-[#8B9B8B]" />
+          )}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 mb-6">
+        {presets.map((preset) => (
+          <motion.button
+            key={preset.minutes}
+            onClick={() => selectPreset(preset.minutes)}
+            className={`py-3 px-2 rounded-xl text-sm font-medium transition-all ${
+              selectedPreset === preset.minutes
+                ? 'bg-[#A8C5A8] text-white'
+                : 'bg-[#F5F3EE] text-[#5B6E5D] hover:bg-[#E8E4DC]'
+            }`}
+            whileTap={{ scale: 0.95 }}
+          >
+            {preset.label}
+          </motion.button>
+        ))}
+      </div>
+
+      <div className="relative mb-6">
+        <div className="w-48 h-48 mx-auto relative">
+          <svg className="w-full h-full transform -rotate-90">
+            <circle
+              cx="96"
+              cy="96"
+              r="88"
+              fill="none"
+              stroke="#E8E4DC"
+              strokeWidth="8"
+            />
+            <motion.circle
+              cx="96"
+              cy="96"
+              r="88"
+              fill="none"
+              stroke="#A8C5A8"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={553}
+              initial={{ strokeDashoffset: 553 }}
+              animate={{ strokeDashoffset: 553 - (553 * progress) / 100 }}
+              transition={{ duration: 0.5 }}
+            />
+          </svg>
+          
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-4xl font-light text-[#5B6E5D] tracking-wide">
+              {formatTime(timeLeft)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center gap-4">
+        <motion.button
+          onClick={resetTimer}
+          className="w-12 h-12 rounded-full bg-[#F5F3EE] flex items-center justify-center text-[#8B9B8B] hover:bg-[#E8E4DC] transition-colors"
+          whileTap={{ scale: 0.9 }}
+          disabled={!selectedPreset}
+        >
+          <RotateCcw className="w-5 h-5" />
+        </motion.button>
+        
+        <motion.button
+          onClick={toggleTimer}
+          className={`w-16 h-16 rounded-full flex items-center justify-center text-white transition-colors ${
+            selectedPreset
+              ? 'bg-gradient-to-br from-[#A8C5A8] to-[#8FB38F]'
+              : 'bg-[#E8E4DC] cursor-not-allowed'
+          }`}
+          whileTap={selectedPreset ? { scale: 0.9 } : {}}
+          disabled={!selectedPreset}
+        >
+          {isRunning ? (
+            <Pause className="w-6 h-6" />
+          ) : (
+            <Play className="w-6 h-6 ml-1" />
+          )}
+        </motion.button>
+
+        <div className="w-12 h-12" />
+      </div>
+
+      <AnimatePresence>
+        {selectedPreset && timeLeft === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="mt-4 text-center text-[#D4A088] font-medium"
+          >
+            ✨ Time's up! Great job!
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+Home.jsx - Main page
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { BookOpen, Clock, Heart, ChevronRight, Sparkles } from 'lucide-react';
+import Timer from '@/components/Timer';
+import TipCard from '@/components/TipCard';
+import SOSButton from '@/components/SOSButton';
+
+const dailyTips = [
+  {
+    icon: 'tip',
+    title: 'Redirect, Don\'t React',
+    content: 'When your toddler reaches for something off-limits, calmly redirect their attention to something safe and engaging instead of saying "no."',
+    source: 'American Academy of Pediatrics'
+  },
+  {
+    icon: 'heart',
+    title: 'Validate Their Feelings',
+    content: 'Say "I can see you\'re feeling frustrated" to help your toddler understand emotions. This builds emotional intelligence.',
+    source: 'Zero to Three'
+  },
+  {
+    icon: 'star',
+    title: 'Routine is Comfort',
+    content: 'Predictable routines help toddlers feel secure. Even small rituals like a goodbye wave can reduce separation anxiety.',
+    source: 'CDC Developmental Milestones'
+  },
+];
+
+const quickActions = [
+  {
+    icon: BookOpen,
+    label: 'Resources',
+    description: 'Trusted guides',
+    page: 'Resources',
+    color: '#A8C5A8'
+  },
+  {
+    icon: Clock,
+    label: 'Milestones',
+    description: 'Track growth',
+    page: 'Milestones',
+    color: '#D4A088'
+  },
+];
+
+export default function Home() {
+  const greeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FDFBF7]">
+      <div className="max-w-lg mx-auto px-4 py-6 pb-32">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <p className="text-[#8B9B8B] text-sm mb-1">{greeting()} ✨</p>
+          <h1 className="text-2xl font-semibold text-[#5B6E5D]">
+            You're doing great
+          </h1>
+        </motion.div>
+
+        <div className="grid grid-cols-2 gap-3 mb-8">
+          {quickActions.map((action, idx) => (
+            <motion.div
+              key={action.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+            >
+              <Link
+                to={createPageUrl(action.page)}
+                className="block bg-white rounded-2xl p-4 shadow-sm border border-[#E8E4DC] hover:border-[#A8C5A8] transition-all group"
+              >
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
+                  style={{ backgroundColor: action.color + '20' }}
+                >
+                  <action.icon className="w-5 h-5" style={{ color: action.color }} />
+                </div>
+                <h3 className="font-medium text-[#5B6E5D] mb-0.5">{action.label}</h3>
+                <p className="text-xs text-[#8B9B8B]">{action.description}</p>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mb-8"
+        >
+          <Timer />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-[#5B6E5D]">Today's Tips</h2>
+            <Sparkles className="w-5 h-5 text-[#D4A088]" />
+          </div>
+          
+          <div className="space-y-3">
+            {dailyTips.map((tip, idx) => (
+              <TipCard key={idx} tip={tip} index={idx} />
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      <SOSButton />
+    </div>
+  );
+}
+Layout.jsx - App layout with bottom navigation
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
+import { Home, BookOpen, Clock, Settings } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const navItems = [
+  { icon: Home, label: 'Home', page: 'Home' },
+  { icon: BookOpen, label: 'Resources', page: 'Resources' },
+  { icon: Clock, label: 'Milestones', page: 'Milestones' },
+];
+
+export default function Layout({ children, currentPageName }) {
+  return (
+    <div className="min-h-screen bg-[#FDFBF7]">
+      <style>{`
+        :root {
+          --color-sage: #A8C5A8;
+          --color-sage-dark: #8FB38F;
+          --color-cream: #FDFBF7;
+          --color-warm: #D4A088;
+          --color-text: #5B6E5D;
+          --color-text-muted: #8B9B8B;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+      
+      {children}
+      
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg border-t border-[#E8E4DC] px-4 py-2 z-40">
+        <div className="max-w-lg mx-auto flex justify-around">
+          {navItems.map((item) => {
+            const isActive = currentPageName === item.page;
+            return (
+              <Link
+                key={item.page}
+                to={createPageUrl(item.page)}
+                className={`flex flex-col items-center py-2 px-4 rounded-xl transition-all ${
+                  isActive 
+                    ? 'text-[#A8C5A8]' 
+                    : 'text-[#8B9B8B] hover:text-[#5B6E5D]'
+                }`}
+              >
+                <motion.div
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <item.icon className="w-6 h-6" />
+                </motion.div>
+                <span className="text-xs mt-1 font-medium">{item.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-[#A8C5A8]"
+                  />
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+    </div>
+  );
